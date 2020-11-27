@@ -1,8 +1,13 @@
 import requests
 import json
 
-from celery.task import Task
 
+try:    
+    from celery import Task
+except ModuleNotFoundError:
+    # fallback to pre celery 5.x.x Task import
+    from celery.task import Task
+    
 from django.core.serializers.json import DjangoJSONEncoder
 
 from rest_hooks.utils import get_hook_model
@@ -32,4 +37,4 @@ class DeliverHook(Task):
 def deliver_hook_wrapper(target, payload, instance=None, hook=None, **kwargs):
     if hook:
         kwargs['hook_id'] = hook.id
-    return DeliverHook.delay(target, payload, **kwargs)
+    return DeliverHook().delay(target, payload, **kwargs)
